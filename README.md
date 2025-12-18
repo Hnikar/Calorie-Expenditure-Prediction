@@ -1,100 +1,142 @@
-# Zadanie domowe
+# Odpowiedzi na część teoretyczną
 
-## Konfiguracja
+## Opis architektury sieci
 
-1. **Zainstaluj Git**
-   Instrukcja instalacji: [https://github.com/git-guides/install-git](https://github.com/git-guides/install-git)
+Rozważana sieć neuronowa składa się z:
+- dwóch cech wejściowych: $x_1, x_2$,
+- jednej warstwy ukrytej złożonej z 2 neuronów z funkcją aktywacji ReLU,
+- jednego neuronu wyjściowego bez funkcji aktywacji.
 
-2. **Zainstaluj `uv`**
-   `uv` to narzędzie do zarządzania środowiskiem i uruchamiania skryptów w projekcie.
+Dla pojedynczej obserwacji dane wejściowe wynoszą:
+- $x_1 = 2$
+- $x_2 = 3$
+- wartość docelowa: $y = 5$
 
-```bash
-pip install uv
-```
-
-Instrukcja instalacji: [https://docs.astral.sh/uv/getting-started/installation/#standalone-installer](https://docs.astral.sh/uv/getting-started/installation/#standalone-installer)
-
----
-
-## Inicjalizacja projektu
-
-1. **Sklonuj repozytorium**
-
-```bash
-git clone <url>
-```
-
-2. **Utwórz nowy branch**
-
-```bash
-git checkout -b <nazwa_brancha>
-```
-
-3. **Stwórz środowisko wirtualne i zsynchronizuj zależności**
-
-```bash
-uv sync
-```
-
-4. **Uruchom kod treningowy**
-
-```bash
-uv run python -m src.train
-```
-
-5. **Uruchom testy jednostkowe**
-
-```bash
-uv run python -m pytest
-```
+Funkcją straty jest Mean Squared Error (MSE):  
+$L = (\hat{y} - y)^2$
 
 ---
 
-## Treść zadania programistycznego
+## Model matematyczny sieci
 
-Konkurs: [Kaggle Playground Series S5E5](https://www.kaggle.com/competitions/playground-series-s5e5/overview)
+### Warstwa ukryta
 
-Waszym zadaniem jest dobranie odpowiedniej **architektury sieci neuronowej** do predykcji liczby spalanych kalorii podczas treningu.
+Dla pierwszego neuronu:  
+$z_1 = w_{11}x_1 + w_{12}x_2 + b_1$
 
-Projekt powinien obejmować:
+Dla drugiego neuronu:  
+$z_2 = w_{21}x_1 + w_{22}x_2 + b_2$
 
-* Podział danych na treningowe i walidacyjne w celu ewaluacji jego jakości i uniknięcia przeuczenia
-* Ustawienie seed'a aby zapewnić reprodukowalność eksperymentów
-* Porównanie różnych architektur sieci i hiperparametrów (np. `learning rate`, `momentum`, `batch size`)
-* Porównanie jakości modeli **z użyciem i bez użycia dropout**
-* Skrypt do predykcji, który zwraca wyniki w formacie określonym na stronie konkursu
-* Wizualizacje danych i część analityczną, pokazującą interesujące zależności w danych
+Funkcja aktywacji ReLU:  
+$a_i = \max(0, z_i)$
 
-Finalny rezultat:
+### Warstwa wyjściowa
 
-* Utworzenie repozytorium na platformie GitHub z rozwiązaniem zadania oraz uworzeniem Merge Request'a do głównego branch'a (kod powinien znajdować się na branchu developerskim)
-* Dodanie konta `jfraszczakcdv` jako contributor'a repozytorium
-* Zamieszczenie w repozytorium drobnego raportu obejmujacego analizę danych
-* Zamieszczenie swoich predykcji na danych testowych na stronie konkursu
+$\hat{y} = v_1 a_1 + v_2 a_2 + b_3$
+
+---
+
+## Przypadek 1: inicjalizacja wszystkich parametrów wartością 0.0
+
+### Forward pass
+
+$$
+z_1 = z_2 = 0
+$$
+
+$$
+a_1 = a_2 = \text{ReLU}(0) = 0
+$$
+
+$$
+\hat{y} = 0
+$$
+
+$$
+L = (0 - 5)^2 = 25
+$$
+
+## Pochodne
+
+Pochodna funkcji straty względem wyjścia:  
+$\frac{\partial L}{\partial \hat{y}} = 2(\hat{y} - y) = -10$
+
+Pochodna funkcji ReLU w punkcie $z = 0$:  
+$\frac{d}{dz}\text{ReLU}(0) = 0$
+
+W rezultacie wszystkie gradienty wag i biasów są równe zero:  
+$\frac{\partial L}{\partial w} = 0,\quad \frac{\partial L}{\partial b} = 0$
+
+## Wniosek
+
+Sieć neuronowa nie jest w stanie się uczyć, ponieważ brak jest niezerowych gradientów umożliwiających aktualizację parametrów.
+
+---
+
+## Przypadek 2: inicjalizacja wszystkich parametrów wartością 1.0
+
+### Forward pass
+
+Warstwa ukryta:  
+$z_1 = 1 \cdot 2 + 1 \cdot 3 + 1 = 6$  
+
+$z_2 = 6$
+
+Po zastosowaniu ReLU:  
+$a_1 = a_2 = 6$
+
+Wyjście sieci:  
+$\hat{y} = 1 \cdot 6 + 1 \cdot 6 + 1 = 13$
+
+Strata:  
+$L = (13 - 5)^2 = 64$
 
 
-## Treść zadania teoretycznego
+---
 
-1. Oblicz pochodne parametrów (w i b) sieci neuronowej o następującej architekturze:
+## Backpropagation – pochodne
 
-* Wejście: 2 cechy -> [x1, x2]  
-* Warstwa ukryta: 2 neurony + ReLU 
-* Wyjście: 1 neuron -> y (brak funkcji aktywacji)
-* Funkcja straty: Mean Squared Error
-* Jedna obserwacja wejściowa [x1, x2] -> [2, 3], y -> 5
+Pochodna funkcji straty względem wyjścia:  
+$\frac{\partial L}{\partial \hat{y}} = 2(\hat{y} - y) = 16$
 
-Czy sieć jest w stanie się uczyć gdy wszystkie parametry zostaną zainicjalizowane z wartością 0.0?
-Oblicz pochodne dla przypadku gdzie wszystkie parametry zainicjowane są z wartością 1.0.
+Gradienty wag warstwy wyjściowej:  
+$\frac{\partial L}{\partial v_1} = 16 \cdot 6 = 96$  
 
-2. Odpowiedz na pytania:
+$\frac{\partial L}{\partial v_2} = 96$
 
-* Dla jakich rodzajów zadań warto rozpatrzyć użycie sieci neuronowej. Dlaczego nie można napisać ręcznie programu (bez trenowania modelu) do predykcji wartości składającego się z samych if'ów? Na przykład precyzując warunki jeśli x1 = 5 oraz x2 = 1 to predykcja powinna być równa 5.6.
-* W jakim celu używane są funkcje aktywacji? Co się stanie jeśli w sieci o wielu warstwach ukrytych pozbędziemy się funkcji aktywacji?
-* Wyjaśnij rolę dropout'u w trenowaniu sieci neuronowych.
+Gradient biasu neuronu wyjściowego:  
+$\frac{\partial L}{\partial b_3} = 16$
 
+Gradienty wag warstwy ukrytej:  
+$\frac{\partial L}{\partial w_{11}} = 16 \cdot 1 \cdot 2 = 32$  
 
+$\frac{\partial L}{\partial w_{12}} = 16 \cdot 1 \cdot 3 = 48$
 
+Analogicznie wyznacza się pochodne dla drugiego neuronu warstwy ukrytej.
 
+### Wniosek
 
+Sieć neuronowa jest w stanie się uczyć, ponieważ gradienty są różne od zera.
 
+---
 
+## Zastosowanie sieci neuronowych
+
+Sieci neuronowe warto stosować w zadaniach, w których występują:
+- złożone i nieliniowe zależności pomiędzy danymi,
+- dane zaszumione,
+- bardzo duża liczba możliwych kombinacji danych wejściowych.
+
+Nie jest możliwe stworzenie programu opartego wyłącznie na instrukcjach warunkowych typu if, ponieważ liczba potencjalnych przypadków byłaby zbyt duża, a zależności pomiędzy zmiennymi nie są znane z góry. Sieci neuronowe uczą się wzorców bez konieczności ręcznego definiowania reguł.
+
+---
+
+## Rola funkcji aktywacji
+
+Funkcje aktywacji wprowadzają nieliniowość do modelu. W przypadku usunięcia funkcji aktywacji z sieci wielowarstwowej, cała sieć sprowadza się do jednej funkcji liniowej, niezależnie od liczby warstw, co znacząco ogranicza jej zdolności modelowania złożonych relacji.
+
+---
+
+## Rola dropout’u
+
+Dropout jest techniką regularizacji polegającą na losowym wyłączaniu neuronów podczas treningu. Zapobiega to przeuczeniu modelu oraz poprawia zdolność generalizacji sieci neuronowej na nowe dane.
