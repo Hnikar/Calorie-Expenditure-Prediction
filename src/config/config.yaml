@@ -1,8 +1,13 @@
 training:
   learning_rate: 1e-3
-  epochs: 30
+  epochs: 100
   batch_size: 64
   momentum: 0.9
 
 data:
   train: "data/train.csv"
+  test: "data/test.csv"
+
+model:
+  hidden_dim: 64
+  dropout: 0.0
