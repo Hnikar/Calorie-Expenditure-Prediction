@@ -1,3 +1,37 @@
+# Raport z zadania domowego: Przewidywanie wydatku kalorycznego
+
+## 1. Analiza Danych (EDA)
+Przeanalizowaliśmy zbiór danych, aby zrozumieć rozkłady cech oraz występujące korelacje.
+
+**Kluczowe wnioski:**
+* **Korelacja:** Zaobserwowaliśmy silną korelację między `Duration` (czas trwania), `Heart_Rate` (tętno) oraz `Body_Temp` (temperatura ciała) a zmienną docelową `Calories`. Sugeruje to, że intensywność i czas trwania treningu są najbardziej znaczącymi predyktorami.
+* **Rozkład:** Zmienna docelowa `Calories` wykazuje rozkład prawostronnie skośny.
+
+![Macierz korelacji](reports/correlation_matrix.png)
+![Rozkład kalorii](reports/calories_dist.png)
+
+---
+
+## 2. Analiza Modelu i Eksperymenty
+Aby ustalić optymalną architekturę, przeprowadziliśmy eksperymenty porównujące model bazowy z modelem wykorzystującym regularyzację (Dropout rate = 0.2).
+
+### Model A: Bazowy (Bez Dropoutu)
+* **Konfiguracja:** Hidden Dim: 64, Dropout: 0.0
+* **Wynik:** Końcowe walidacyjne RMSLE: **0.0576**
+
+![Strata Trening vs Walidacja - Bez Dropoutu](reports/loss_plot_no_dropout.png)
+
+### Model B: Z regularyzacją (Dropout 0.2)
+* **Konfiguracja:** Hidden Dim: 64, Dropout: 0.2
+* **Wynik:** Końcowe walidacyjne RMSLE: **0.0626**
+
+![Strata Trening vs Walidacja - Z Dropoutem](reports/loss_plot_with_dropout.png)
+
+### Wnioski
+Eksperyment wykazał, że model **bez Dropoutu** osiągnął lepsze wyniki. Model z Dropoutem wykazywał znacznie wyższą stratę treningową (Training Loss) w porównaniu do straty walidacyjnej (Validation Loss), co sugeruje **niedouczenie** (underfitting). Biorąc pod uwagę rozmiar zbioru danych i architekturę, agresywna regularyzacja okazała się zbędna.
+
+**Wybrany model:** Bez Dropoutu (RMSLE 0.0576).
+
 # Odpowiedzi na część teoretyczną
 
 ## Opis architektury sieci
@@ -140,3 +174,4 @@ Funkcje aktywacji wprowadzają nieliniowość do modelu. W przypadku usunięcia 
 ## Rola dropout’u
 
 Dropout jest techniką regularizacji polegającą na losowym wyłączaniu neuronów podczas treningu. Zapobiega to przeuczeniu modelu oraz poprawia zdolność generalizacji sieci neuronowej na nowe dane.
+
