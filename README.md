@@ -175,3 +175,10 @@ Funkcje aktywacji wprowadzają nieliniowość do modelu. W przypadku usunięcia 
 
 Dropout jest techniką regularizacji polegającą na losowym wyłączaniu neuronów podczas treningu. Zapobiega to przeuczeniu modelu oraz poprawia zdolność generalizacji sieci neuronowej na nowe dane.
 
+---
+
+## Autorzy
+
+* Illia Tymoshenko
+* Pavlo Shkoda
+* Anastasiia Cherniakova
